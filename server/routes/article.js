@@ -24,13 +24,12 @@ router.get("/:id", articleController.find);
 router.get("/", articleController.findAll);
 
 
+//like an article
 router.patch('/like/:id', articleController.like)
+//unlike an article
 router.patch('/unlike/:id', articleController.unlike)
 //====middlewares=====
 router.use(authenticate)
-
-//like an article
-
 
 
 //create new article

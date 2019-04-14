@@ -93,7 +93,7 @@ function alert(type, msg) {
     $('#modal-alert').iziModal('open');
 }
 
-const baseURL = "http://localhost:3000";
+const baseURL = "http://blogr-server.michaeltim.com";
 
 function notif(type, msg) {
     Toast.fire({
