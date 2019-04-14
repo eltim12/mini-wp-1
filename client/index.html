@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <!-- [google sign in] -->
+    <meta name="google-signin-client_id"
+        content="1017994044302-tt3ko0d78ciuqclnu6crn6gskq2qpmkf.apps.googleusercontent.com">
+
+    <!-- [IZI MODAL] -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/css/iziModal.css">
+
+    <!-- [jQuery] -->
+    <script src="https://code.jquery.com/jquery-2.2.4.js"
+        integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+
+    <!-- [bootstrap] -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- [icons] -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+    <!-- [vuejs] -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+
+    <!-- [swal2] -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+
+    <!-- [fonts] -->
+    <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|VT323|Work+Sans" rel="stylesheet">
+
+    <!-- [aos] -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- [css] -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- [Vue Wysiwyg] -->
+    <link rel="stylesheet" href="./vueWysiwyg.css" />
+
+    <!-- [Axios] -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- [Tag Manager] -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@voerro/vue-tagsinput@1.11.2/dist/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@voerro/vue-tagsinput@1.8.0/dist/voerro-vue-tagsinput.js"></script>
+
+    <title>Mini-WP</title>
+</head>
+
+<body>
+    <div id="fb-root"></div>
+
+    <div id="app">
+
+        <div id="beforeLogin" v-show="islogin === false">
+            <div data-aos="fade-down" data-aos-anchor-placement="bottom-bottom" data-aos-duration="1500">
+                <login-form v-show="position === 'login'" @register="position = 'register'" @loggedin="loggedin">
+                </login-form>
+
+                <register-form v-show="position === 'register'" @registered="position = 'login'"
+                    @login="position = 'login'">
+                </register-form>
+            </div>
+        </div>
+
+        <navbar-template 
+            v-if="islogin === true" 
+            @list-article="position = 'list-article'" 
+            @search="submitSearch"
+            @to-user-article="userArticle()" 
+            @add-article="addArticle()" 
+            @logout="logout()"
+        >
+        </navbar-template>
+
+        <template v-if="islogin === true">
+            <div id="all-content">
+
+                <!-- -------------------------[L I S T   A R T I C L E]--------------------------- -->
+                <list-article 
+                    v-if="position === 'list-article'" 
+                    :article-list="articleList"
+                    :top-articles="topArticles"
+                    @top-list="getTopList" 
+                    @edit-post="findArticle"
+                    @search-tag="submitSearch"
+                    @liked="showAllPost"
+                >
+                </list-article>
+
+
+                <!-- -------------------------[U S E R   A R T I C L E]--------------------------- -->
+                <my-article 
+                    v-if="position === 'user-article'" 
+                    :user-info="myInfo" 
+                    :my-article="myArticles"
+                    @add-post="addArticle" 
+                    @edit-post="findArticle"
+                    @search-tag="submitSearch"
+                >
+                </my-article>
+
+                <!-- -------------------------[S E A R C H   A R T I C L E]--------------------------- -->
+                <search-article 
+                    v-if="position === 'search-article'" 
+                    :search="search" 
+                    :search-on-screen="searchOnScreen"
+                    :show-search="showSearch" 
+                    :show-null="showNull" 
+                    :found-articles="foundArticles"
+                    @search-tag="submitSearch"
+                >
+                </search-article>
+
+
+                <!-- -------------------------[T O P  A R T I C L E]--------------------------- -->
+                <top-articles 
+                    v-if="position === 'top-list'" 
+                    :article-info="topArticle"
+                    @edit-post="findArticle"
+                    @search-tag="submitSearch"
+                >
+                </top-articles>
+
+                <!-- -------------------------[A D D  A R T I C L E]--------------------------- -->
+                <add-article-template v-if="position === 'add-article'" @added-post="showAllPost">
+                </add-article-template>
+
+
+                <!-- -------------------------[U P D A T E  A R T I C L E]--------------------------- -->
+                <edit-article-template v-if="position === 'edit-article'" :article-data="editArticleData"
+                    @deleted="userArticle" @updated-post="updateDone">
+                </edit-article-template>
+
+
+                <!-- -------------------------[S H O W  N U L L]--------------------------- -->
+                <div id="null" v-if="position === 'null'">
+                    <div class="container">
+                        <div class="row">
+                            <div class="mx-auto">
+                                <h4 class="text-light mb-5 mt-2">not Found.</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <footer>
+                © 2019 @Blogr _ P.IVA 03610560983 _ Privacy and Cookie
+            </footer>
+        </template>
+
+    </div>
+
+    <div id="modal-alert"></div>
+
+
+
+
+
+    <!-- [vuejs] -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+
+    <!-- [swal2] -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+
+    <!-- ──────────────────────────[IMAGE INPUT]────────────────────────────── -->
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/vue-picture-input"></script>
+
+    <!-- ──────────────────────────VUE WYSIWYG─────────────────────────────────────── -->
+    <script src="./components/vueWysiwyg.js"></script>
+
+    <!-- ──────────────────────────IZI MODAL─────────────────────────────────────── -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.js"></script>
+
+    <!-- ──────────────────────────LIKE BUTTON─────────────────────────────────────── -->
+    <script src="./components/like-button.js"></script>
+
+    <!-- ──────────────────────────NAV BAR─────────────────────────────────────── -->
+    <script src="./components/navbar.js"></script>
+
+    <!-- ──────────────────────────LOGIN─────────────────────────────────────── -->
+    <script src="./components/login-form.js"></script>
+
+    <!-- ──────────────────────────REGISTER─────────────────────────────────────── -->
+    <script src="./components/register-form.js"></script>
+
+    <!-- ──────────────────────────ADD ARTICLE────────────────────────────────── -->
+    <script src="./components/add-article.js"></script>
+
+    <!-- ──────────────────────────UPDATE ARTICLE────────────────────────── -->
+    <script src="./components/update-article.js"></script>
+
+    <!-- ──────────────────────────SEARCH ARTICLE────────────────────────────────── -->
+    <script src="./components/search-article.js"></script>
+
+    <!-- ──────────────────────────TOP  ARTICLE────────────────────────────────── -->
+    <script src="./components/top-article.js"></script>
+
+    <!-- ──────────────────────────LIST ARTICLE────────────────────────────────── -->
+    <script src="./components/list-article.js"></script>
+
+    <!-- ──────────────────────────USER ARTICLE────────────────────────────────── -->
+    <script src="./components/my-article.js"></script>
+
+    <!-- ─────────────────────────AOS──────────────────────────────────────── -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <!-- ─────────────────────────MAIN SCRIPT──────────────────────────────────────── -->
+    <script src="./script.js"></script>
+
+    <!-- ──────────────────────────GOOGLE SIGNIN─────────────────────────────────────── -->
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton"></script>
+
+    <script>
+        AOS.init();
+
+        (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+</body>
+
+</html>
+
+
+<!-- <div class="fb-share-button" :data-href="post.photo" data-layout="button_count">
+</div> -->
+
+
+
