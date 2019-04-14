@@ -11,7 +11,7 @@ mongoose.set("useFindAndModify", false)
 
 // mongoose.connect(`mongodb://localhost:27017/mini-wp`, { useNewUrlParser: true })
 
-mongoose.connect(`mongodb+srv://eltim:${process.env.ATLAST_PW}@cluster0-sfchz.gcp.mongodb.net/test?retryWrites=true`, { useNewUrlParser: true })
+mongoose.connect(`mongodb+srv://${process.env.ATLAST_NAME}:${process.env.ATLAST_PW}@cluster0-sfchz.gcp.mongodb.net/test?retryWrites=true`, { useNewUrlParser: true })
 
 
 app.use(express.urlencoded({ limit: '50mb', extended: false }));
